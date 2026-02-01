@@ -1,32 +1,31 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import requests
 from datetime import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # allow cross-origin requests
+CORS(app)  # allow frontend to call API
 
-# === Hardcoded Discord Webhook URL ===
+# Hardcoded Discord webhook
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1467553434541625558/fKl1f66ykkbYUxlzxhR-ODuDaskO6bZvEi_Xb7zxeR0MNelnYg3LJBs-ZFCmA2QYDmbK"
 
-@app.post('/api/contact')  # Flask 3 style
+@app.post("/api/contact")
 def contact():
     data = request.get_json()
     if not data:
         return jsonify({"error": "Invalid JSON"}), 400
 
-    name = data.get('name')
-    email = data.get('email')
-    phone = data.get('phone')
-    message = data.get('message', 'No message provided')
+    name = data.get("name")
+    email = data.get("email")
+    phone = data.get("phone")
+    message = data.get("message", "No message provided")
 
     if not name or not email or not phone:
         return jsonify({"error": "Missing required fields"}), 400
 
-    # Create Discord embed
     embed = {
         "title": "New Client Received",
-        "color": 3447003,  # blue
+        "color": 3447003,
         "fields": [
             {"name": "Name", "value": name, "inline": True},
             {"name": "Email", "value": email, "inline": True},
@@ -43,6 +42,3 @@ def contact():
     except requests.exceptions.RequestException as e:
         print("Error sending to Discord:", e)
         return jsonify({"error": "Failed to send message"}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
